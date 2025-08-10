@@ -39,12 +39,16 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Location Button */}
               <button
                 onClick={onLocationClick}
-                className="flex items-center px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors"
+                className="flex items-center px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors min-w-0"
               >
                 <MapPin className="w-5 h-5 text-gray-400 mr-2" />
-                <div className="text-left">
-                  <div className="text-gray-800 font-medium">{currentLocation.city}</div>
-                  <div className="text-gray-500 text-sm">{currentLocation.state}</div>
+                <div className="text-left min-w-0 flex-1">
+                  <div className="text-gray-800 font-medium truncate">
+                    {currentLocation.neighborhood || currentLocation.city}
+                  </div>
+                  <div className="text-gray-500 text-sm truncate">
+                    {currentLocation.neighborhood ? `${currentLocation.city}, ${currentLocation.state}` : currentLocation.state}
+                  </div>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400 ml-2" />
               </button>

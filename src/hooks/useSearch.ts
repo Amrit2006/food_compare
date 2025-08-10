@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Restaurant, MenuItem, PriceComparison, Location } from '../types';
 import { mockRestaurants, mockMenuItems } from '../data/mockData';
+import { addressService } from '../services/addressService';
 
 export const useSearch = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -11,9 +12,18 @@ export const useSearch = () => {
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [sortBy, setSortBy] = useState('relevance');
-  const [currentLocation, setCurrentLocation] = useState<Location>({
-    city: 'Delhi',
-    state: 'Delhi'
+  const [currentLocation, setCurrentLocation] = useState<Location>(() => {
+    // Try to get default saved address first
+    const defaultAddress = addressService.getDefaultAddress();
+    if (defaultAddress) {
+      return defaultAddress;
+    }
+    
+    // Fallback to Delhi
+    return {
+      city: 'Delhi',
+      state: 'Delhi'
+    };
   });
 
   const search = async (query: string) => {
