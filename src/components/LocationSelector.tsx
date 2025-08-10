@@ -289,15 +289,6 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       </div>
     );
   }
-        setIsDetecting(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
-      }
-    );
-  };
 
   const handleCitySelect = (city: Location) => {
     onLocationChange(city);
