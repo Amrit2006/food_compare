@@ -5,6 +5,7 @@ import { SearchResults } from './components/SearchResults';
 import { PriceComparisonTable } from './components/PriceComparisonTable';
 import { LocationSelector } from './components/LocationSelector';
 import { FoodRecommendations } from './components/FoodRecommendations';
+import { LocationConfirmation } from './components/LocationConfirmation';
 import { useSearch } from './hooks/useSearch';
 
 function App() {
@@ -30,21 +31,48 @@ function App() {
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
   const [showComparison, setShowComparison] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
+  const [showLocationConfirmation, setShowLocationConfirmation] = useState(false);
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
 
   const handleSearch = () => {
+    if (!locationConfirmed) {
+      setShowLocationConfirmation(true);
+      return;
+    }
     search(currentSearchQuery);
     setShowComparison(false);
   };
 
+  const handleLocationConfirmed = () => {
+    setLocationConfirmed(true);
+    setShowLocationConfirmation(false);
+    search(currentSearchQuery);
+  };
+
+  const handleLocationChange = () => {
+    setShowLocationConfirmation(false);
+    setShowLocationSelector(true);
+  };
+
+  const handleLocationSelected = (location: Location) => {
+    setCurrentLocation(location);
+    setLocationConfirmed(false);
+    setShowLocationSelector(false);
+  };
   const handleComparisonView = () => {
     setShowComparison(true);
   };
 
   const handleRecommendationClick = (foodName: string) => {
     setCurrentSearchQuery(foodName);
+    if (!locationConfirmed) {
+      setShowLocationConfirmation(true);
+      return;
+    }
     search(foodName);
     setShowComparison(false);
   };
+
   const priceComparison = showComparison && searchQuery 
     ? generatePriceComparison(searchQuery)
     : null;
@@ -61,10 +89,22 @@ function App() {
       
       <LocationSelector
         currentLocation={currentLocation}
-        onLocationChange={setCurrentLocation}
+        onLocationChange={handleLocationSelected}
         isOpen={showLocationSelector}
         onClose={() => setShowLocationSelector(false)}
       />
+      
+      {/* Location Confirmation */}
+      {showLocationConfirmation && (
+        <div className="container mx-auto px-4 py-6">
+          <LocationConfirmation
+            currentLocation={currentLocation}
+            onLocationConfirmed={handleLocationConfirmed}
+            onLocationChange={handleLocationChange}
+            isVisible={showLocationConfirmation}
+          />
+        </div>
+      )}
       
       {searchQuery && (
         <FilterBar
@@ -94,7 +134,7 @@ function App() {
       ) : (
         <div>
           {/* Food Recommendations */}
-          {(searchQuery || currentSearchQuery) && (
+          {(searchQuery || currentSearchQuery) && locationConfirmed && (
             <div className="container mx-auto px-4 py-6">
               <FoodRecommendations
                 searchQuery={currentSearchQuery || searchQuery}
@@ -108,6 +148,7 @@ function App() {
             menuItems={menuItems}
             loading={loading}
             searchQuery={searchQuery}
+            currentLocation={currentLocation}
           />
         </div>
       )}
@@ -139,6 +180,10 @@ function App() {
                 key={term}
                 onClick={() => {
                   setCurrentSearchQuery(term);
+                  if (!locationConfirmed) {
+                    setShowLocationConfirmation(true);
+                    return;
+                  }
                   search(term);
                 }}
                 className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all text-center group"
